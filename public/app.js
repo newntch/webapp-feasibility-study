@@ -1,5 +1,6 @@
 import { defaultConfig, normalizeCohortConfig } from '../src/cohortEngine.js';
 import { buildSql } from '../src/sqlBuilder.js';
+import { buildOmopPreviewSql } from '../src/omopSqlBuilder.js';
 import {
   FILTER_FIELDSETS,
   conditionValuesFromTree,
@@ -660,7 +661,9 @@ function sendPrompt(prompt) {
 }
 
 function renderSql() {
-  const generated = buildSql(state.config);
+  const generated = state.dataSource === 'omop-duckdb'
+    ? buildOmopPreviewSql(state.config)
+    : buildSql(state.config);
   state.currentSql = generated.sql;
   els.generatedSql.innerHTML = highlightSql(generated.sql);
   els.sqlSummary.textContent = generated.summary;
@@ -669,7 +672,7 @@ function renderSql() {
 function highlightSql(sql) {
   const escaped = escapeHtml(sql);
   return escaped.replace(
-    /\b(WITH|AS|SELECT|DISTINCT|FROM|WHERE|JOIN|ON|AND|OR|EXISTS|NOT|IN|BETWEEN|DATEADD|DATEDIFF|YEAR|MONTH|GETDATE|CAST|NULL|GROUP BY|MIN|UNION ALL|TRY_CONVERT|COALESCE)\b/g,
+    /\b(WITH|AS|SELECT|DISTINCT|FROM|WHERE|JOIN|ON|AND|OR|EXISTS|NOT|IN|BETWEEN|DATEADD|DATEDIFF|DATE_DIFF|DATE_TRUNC|YEAR|MONTH|GETDATE|CURRENT_DATE|CAST|TRY_CAST|MAKE_DATE|NULL|GROUP BY|MIN|UNION ALL|TRY_CONVERT|COALESCE|STRPOS|STARTS_WITH|ENDS_WITH)\b/g,
     '<span class="sql-keyword">$1</span>'
   );
 }

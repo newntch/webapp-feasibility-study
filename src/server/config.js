@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { normalizeDataSource } from './dataSourceConfig.js';
+import { DEFAULT_OMOP_DUCKDB_PATH } from './omopDuckdbRepository.js';
 
 export async function loadServerConfig(options = {}) {
   const normalized = normalizeLoadOptions(options);
@@ -46,6 +47,9 @@ export async function loadServerConfig(options = {}) {
     clinicalDataSource: normalizeDataSource(config.clinicalDataSource || config.dataSource),
     dataSource: normalizeDataSource(config.clinicalDataSource || config.dataSource),
     appStorage: normalizeAppStorage(config.appStorage),
+    omopDuckdb: {
+      path: String(config.omopDuckdb?.path || DEFAULT_OMOP_DUCKDB_PATH).trim()
+    },
     sqlServer: {
       server: String(config.sqlServer.server || '').trim(),
       port: Number(config.sqlServer.port || 1433),
@@ -127,6 +131,13 @@ function applyEnvOverrides(fileConfig, env) {
       fileConfig.clinicalDataSource ?? fileConfig.dataSource
     ),
     appStorage: readString(env.APP_STORAGE, fileConfig.appStorage),
+    omopDuckdb: {
+      ...(fileConfig.omopDuckdb || fileConfig.omopDuckDB || {}),
+      path: readString(
+        env.OMOP_DUCKDB_PATH,
+        fileConfig.omopDuckdb?.path || fileConfig.omopDuckDB?.path || DEFAULT_OMOP_DUCKDB_PATH
+      )
+    },
     sqlServer: {
       ...fileConfig.sqlServer,
       server: readString(env.SQLSERVER_HOST, fileConfig.sqlServer?.server),

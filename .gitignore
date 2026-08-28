@@ -6,6 +6,5 @@ coverage/
 .env.*
 config/*.json
 !config/*.example.json
-data/*.json
-!data/*.example.json
+data
 public/data/synthetic-clinical-data.json

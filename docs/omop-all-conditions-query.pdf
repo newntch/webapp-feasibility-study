@@ -1,0 +1,214 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [7 0 R 9 0 R 11 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Length 4960 >>
+stream
+BT /F2 19 Tf 1 0 0 1 52.0 790.0 Tm (Cohort Lens: OMOP All-Conditions Query) Tj ET
+BT /F1 10 Tf 1 0 0 1 52.0 765.0 Tm (Diagnosis Feasibility Study Webapp) Tj ET
+BT /F2 14 Tf 1 0 0 1 52.0 732.0 Tm (1. Cohort Conditions) Tj ET
+BT /F1 10 Tf 1 0 0 1 52.0 710.0 Tm (This document contains the complete OMOP CDM query for the demonstration cohort.) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 688.0 Tm (T0 index: Essential hypertension \(SNOMED 59621000\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 678.6 Tm (Index window: 2020-01-01 through 2023-12-31) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 669.2 Tm (Age: 18 through 75 years at T0) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 659.8 Tm (Inclusion: Systolic blood pressure \(LOINC 8480-6\) >= 120 within 0-180 days) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 650.4 Tm (Inclusion: Metformin \(RxNorm 861007\) within 0-90 days) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 641.0 Tm (Exclusion: Hyperlipidemia \(SNOMED 55822004\) within -365 to 0 days) Tj ET
+BT /F1 10 Tf 1 0 0 1 52.0 624.6 Tm (Sex is unrestricted \(Any\). T0 is the earliest matching index event for each patient.) Tj ET
+BT /F2 14 Tf 1 0 0 1 52.0 597.6 Tm (2. Complete DuckDB Query) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 572.6 Tm (WITH PersonBase AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 563.2 Tm (  SELECT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 553.8 Tm (    person_id,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 544.4 Tm (    CASE) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 535.0 Tm (      WHEN birth_datetime IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 525.6 Tm (        THEN CAST\(birth_datetime AS DATE\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 516.2 Tm (      WHEN year_of_birth IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 506.8 Tm (       AND month_of_birth IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 497.4 Tm (       AND day_of_birth IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 488.0 Tm (        THEN MAKE_DATE\() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 478.6 Tm (          CAST\(year_of_birth AS INTEGER\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 469.2 Tm (          CAST\(month_of_birth AS INTEGER\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 459.8 Tm (          CAST\(day_of_birth AS INTEGER\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 450.4 Tm (        \)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 441.0 Tm (    END AS birth_date) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 431.6 Tm (  FROM person) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 422.2 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 412.8 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 403.4 Tm (IndexEvents AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 394.0 Tm (  SELECT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 384.6 Tm (    co.person_id,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 375.2 Tm (    CAST\(co.condition_start_date AS DATE\) AS event_date) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 365.8 Tm (  FROM condition_occurrence co) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 356.4 Tm (  JOIN concept c) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 347.0 Tm (    ON c.concept_id = co.condition_concept_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 337.6 Tm (  WHERE c.concept_code = '59621000') Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 328.2 Tm (    AND co.condition_start_date IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 318.8 Tm (    AND CAST\(co.condition_start_date AS DATE\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 309.4 Tm (        BETWEEN DATE '2020-01-01' AND DATE '2023-12-31') Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 300.0 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 290.6 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 281.2 Tm (IndexCohort AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 271.8 Tm (  SELECT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 262.4 Tm (    person_id,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 253.0 Tm (    MIN\(event_date\) AS t0_date) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 243.6 Tm (  FROM IndexEvents) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 234.2 Tm (  GROUP BY person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 224.8 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 215.4 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 206.0 Tm (BasePatients AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 196.6 Tm (  SELECT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 187.2 Tm (    p.person_id,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 177.8 Tm (    i.t0_date) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 168.4 Tm (  FROM PersonBase p) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 159.0 Tm (  JOIN IndexCohort i) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 149.6 Tm (    ON i.person_id = p.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 140.2 Tm (  WHERE DATE_DIFF\('year', p.birth_date, i.t0_date\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 130.8 Tm (        BETWEEN 18 AND 75) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 121.4 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 112.0 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 102.6 Tm (LabInclusion AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 93.2 Tm (  SELECT DISTINCT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 83.8 Tm (    b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 74.4 Tm (  FROM BasePatients b) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 65.0 Tm (  JOIN measurement m) Tj ET
+BT /F1 8 Tf 1 0 0 1 52.0 27.0 Tm (Cohort Lens - OMOP All-Conditions Query) Tj ET
+BT /F1 8 Tf 1 0 0 1 509.0 27.0 Tm (Page 1) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 5337 >>
+stream
+BT /F3 7.4 Tf 1 0 0 1 60.0 790.0 Tm (    ON m.person_id = b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 780.6 Tm (  JOIN concept c) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 771.2 Tm (    ON c.concept_id = m.measurement_concept_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 761.8 Tm (  WHERE c.concept_code = '8480-6') Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 752.4 Tm (    AND m.measurement_date IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 743.0 Tm (    AND m.value_as_number >= 120) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 733.6 Tm (    AND DATE_DIFF\() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 724.2 Tm (          'day',) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 714.8 Tm (          b.t0_date,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 705.4 Tm (          CAST\(m.measurement_date AS DATE\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 696.0 Tm (        \) BETWEEN 0 AND 180) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 686.6 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 677.2 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 667.8 Tm (DrugInclusion AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 658.4 Tm (  SELECT DISTINCT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 649.0 Tm (    b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 639.6 Tm (  FROM BasePatients b) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 630.2 Tm (  JOIN drug_exposure d) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 620.8 Tm (    ON d.person_id = b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 611.4 Tm (  JOIN concept c) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 602.0 Tm (    ON c.concept_id = d.drug_concept_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 592.6 Tm (  WHERE c.concept_code = '861007') Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 583.2 Tm (    AND d.drug_exposure_start_date IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 573.8 Tm (    AND DATE_DIFF\() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 564.4 Tm (          'day',) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 555.0 Tm (          b.t0_date,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 545.6 Tm (          CAST\(d.drug_exposure_start_date AS DATE\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 536.2 Tm (        \) BETWEEN 0 AND 90) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 526.8 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 517.4 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 508.0 Tm (ExcludedPatients AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 498.6 Tm (  SELECT DISTINCT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 489.2 Tm (    b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 479.8 Tm (  FROM BasePatients b) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 470.4 Tm (  JOIN condition_occurrence co) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 461.0 Tm (    ON co.person_id = b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 451.6 Tm (  JOIN concept c) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 442.2 Tm (    ON c.concept_id = co.condition_concept_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 432.8 Tm (  WHERE c.concept_code = '55822004') Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 423.4 Tm (    AND co.condition_start_date IS NOT NULL) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 414.0 Tm (    AND DATE_DIFF\() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 404.6 Tm (          'day',) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 395.2 Tm (          b.t0_date,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 385.8 Tm (          CAST\(co.condition_start_date AS DATE\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 376.4 Tm (        \) BETWEEN -365 AND 0) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 367.0 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 357.6 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 348.2 Tm (IncludedCohort AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 338.8 Tm (  SELECT b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 329.4 Tm (  FROM BasePatients b) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 320.0 Tm (  JOIN LabInclusion l) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 310.6 Tm (    ON l.person_id = b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 301.2 Tm (  JOIN DrugInclusion d) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 291.8 Tm (    ON d.person_id = b.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 282.4 Tm (\),) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 273.0 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 263.6 Tm (FinalCohort AS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 254.2 Tm (  SELECT i.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 244.8 Tm (  FROM IncludedCohort i) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 235.4 Tm (  WHERE NOT EXISTS \() Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 226.0 Tm (    SELECT 1) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 216.6 Tm (    FROM ExcludedPatients e) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 207.2 Tm (    WHERE e.person_id = i.person_id) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 197.8 Tm (  \)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 188.4 Tm (\)) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 179.0 Tm () Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 169.6 Tm (SELECT) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 160.2 Tm (  \(SELECT COUNT\(*\) FROM person\) AS totalPatients,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 150.8 Tm (  \(SELECT COUNT\(*\) FROM IndexCohort\) AS indexEligibleCount,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 141.4 Tm (  \(SELECT COUNT\(*\) FROM BasePatients\) AS demographicCount,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 132.0 Tm (  \(SELECT COUNT\(*\) FROM IncludedCohort\) AS inclusionCount,) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 122.6 Tm (  \(SELECT COUNT\(*\) FROM FinalCohort\) AS finalCount;) Tj ET
+BT /F2 14 Tf 1 0 0 1 52.0 98.2 Tm (3. Expected Result) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 73.2 Tm (totalPatients       6731) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 63.8 Tm (indexEligibleCount  1351) Tj ET
+BT /F1 8 Tf 1 0 0 1 52.0 27.0 Tm (Cohort Lens - OMOP All-Conditions Query) Tj ET
+BT /F1 8 Tf 1 0 0 1 509.0 27.0 Tm (Page 2) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 652 >>
+stream
+BT /F3 7.4 Tf 1 0 0 1 60.0 790.0 Tm (demographicCount    1047) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 780.6 Tm (inclusionCount      28) Tj ET
+BT /F3 7.4 Tf 1 0 0 1 60.0 771.2 Tm (finalCount          6) Tj ET
+BT /F1 10 Tf 1 0 0 1 52.0 754.8 Tm (The query uses person_id to link events, concept_code to identify standard concepts,) Tj ET
+BT /F1 10 Tf 1 0 0 1 52.0 741.8 Tm (DATE_DIFF for timing relative to T0, and separate inclusion and exclusion CTEs for readable) Tj ET
+BT /F1 10 Tf 1 0 0 1 52.0 728.8 Tm (cohort logic.) Tj ET
+BT /F1 8 Tf 1 0 0 1 52.0 27.0 Tm (Cohort Lens - OMOP All-Conditions Query) Tj ET
+BT /F1 8 Tf 1 0 0 1 509.0 27.0 Tm (Page 3) Tj ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 10 0 R >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000134 00000 n 
+0000000231 00000 n 
+0000000333 00000 n 
+0000000428 00000 n 
+0000005439 00000 n 
+0000005585 00000 n 
+0000010973 00000 n 
+0000011119 00000 n 
+0000011822 00000 n 
+trailer
+<< /Size 12 /Root 1 0 R >>
+startxref
+11970
+%%EOF

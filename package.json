@@ -9,6 +9,7 @@
     "sync-dictionary": "node scripts/sync-dictionary.mjs"
   },
   "dependencies": {
+    "@duckdb/node-api": "1.5.5-r.4",
     "bcryptjs": "^3.0.3",
     "mssql": "^11.0.1",
     "nodemailer": "^8.0.5"

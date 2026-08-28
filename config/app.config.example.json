@@ -34,6 +34,9 @@
   },
   "clinicalDataSource": "json",
   "appStorage": "local",
+  "omopDuckdb": {
+    "path": "data/omop/ehrshot_omop/ehrshot_omop.duckdb"
+  },
   "sqlServer": {
     "server": "",
     "port": 1433,

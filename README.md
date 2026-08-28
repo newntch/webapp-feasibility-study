@@ -92,6 +92,7 @@ Environment variables are still supported as overrides when needed for deploymen
 - `SQLSERVER_PASSWORD`
 - `SQLSERVER_ENCRYPT`
 - `SQLSERVER_TRUST_SERVER_CERTIFICATE`
+- `OMOP_DUCKDB_PATH`
 
 ## Login And Audit Identity
 
@@ -187,6 +188,25 @@ config/app.config.json -> sqlServer.password
 config/app.config.json -> sqlServer.options.encrypt
 config/app.config.json -> sqlServer.options.trustServerCertificate
 ```
+
+For an OMOP CDM DuckDB file, use:
+
+```bash
+config/app.config.json -> clinicalDataSource: "omop-duckdb"
+config/app.config.json -> omopDuckdb.path: "data/omop/ehrshot_omop/ehrshot_omop.duckdb"
+```
+
+The OMOP adapter maps the existing cohort-builder fields to `person`,
+`condition_occurrence`, `measurement`, and `drug_exposure`, resolving standard
+codes and names through `concept`. It derives T0 from the earliest matching
+index event, applies demographic filters at T0, and evaluates inclusion and
+exclusion rules with correlated `EXISTS` predicates. `daysFromT0` uses DuckDB's
+`DATE_DIFF('day', ...)`. Visit concepts are mapped to OPD, IPD, or ED when
+their concept names indicate outpatient, inpatient, or emergency care; other
+visit concept names are retained.
+
+The checked-in EHRShot OMOP file is synthetic/de-identified research data for
+local validation. Do not place identifiable clinical data in this repository.
 
 Notes:
 

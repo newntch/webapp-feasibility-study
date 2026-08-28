@@ -1,0 +1,263 @@
+." Cohort Lens SQL query explanation
+.nr PS 10.5
+.nr VS 13
+.nr PD 36
+.ds CF Cohort Lens - SQL Query Explanation
+.ds LH
+.ds RH
+.ds LF
+.ds RF %
+.NH 0
+.TL
+Cohort Lens: SQL Query Explanation
+.AU
+Diagnosis Feasibility Study Webapp
+.AB
+This document explains the SQL generated and used by the Cohort Lens
+clinical cohort feasibility prototype. The query is generated dynamically
+from the cohort definition entered in the browser.
+.AE
+.NH 1
+1. Overview
+.PP
+The project does not use one fixed SQL query for cohort searches. The browser
+creates a cohort configuration, and src/sqlBuilder.js converts it into SQL
+Server syntax. When SQL Server mode is enabled, the SQL Server repository
+sends the generated query to SQL Server. In JSON mode, equivalent logic runs
+in JavaScript through src/cohortEngine.js.
+.PP
+The browser also displays the generated SQL as a preview. SQL Server
+feasibility execution uses the count query, which returns one row of staged
+counts rather than patient-level rows.
+.NH 1
+2. Clinical Table Mapping
+.PP
+.nf
+.ft CR
+Domain          Table          Event date       Code
+Diagnosis       Diagnosis      VISIT_DATE       ICD_CODE
+Laboratory      Laboratory      RESULT_DATE      LAB_CODE
+Medication      Medication      ORDER_DATE       DRUG_CODE
+.ft R
+.fi
+.PP
+The starter schema is in tests/sql-initial-setup.sql. The clinical tables are
+linked to Patient_Info through OH_PID.
+.NH 1
+3. Main Query Structure
+.PP
+The generated query uses common table expressions (CTEs). Each CTE represents
+one logical stage of cohort construction.
+.NH 2
+3.1 AllEvents
+.PP
+AllEvents normalizes diagnosis, laboratory, and medication records into one
+event stream. It gives each event common fields such as patient ID, domain,
+event date, code, name, numeric value, patient category, and age at event.
+.PP
+.nf
+.ft CR
+WITH AllEvents AS (
+  SELECT OH_PID, 'diagnosis' AS DOMAIN, VISIT_DATE AS EVENT_DATE,
+         ICD_CODE AS CODE, DISEASE_NAME AS NAME
+  FROM Diagnosis
+
+  UNION ALL
+
+  SELECT OH_PID, 'lab', RESULT_DATE, LAB_CODE, LAB_NAME
+  FROM Laboratory
+
+  UNION ALL
+
+  SELECT OH_PID, 'drug', ORDER_DATE, DRUG_CODE, DRUG_NAME
+  FROM Medication
+)
+.ft R
+.fi
+.NH 2
+3.2 IndexRule CTEs
+.PP
+Each T0/index rule becomes an IndexRule CTE. The CTE selects distinct patients
+and event dates that match the nested condition tree and the absolute T0 date
+window.
+.PP
+For the diabetes example, the logic is equivalent to:
+.PP
+.nf
+.ft CR
+IndexRule1 AS (
+  SELECT DISTINCT OH_PID, EVENT_DATE
+  FROM AllEvents
+  WHERE DOMAIN = 'diagnosis'
+    AND (CODE = 'E11.9' OR CODE = 'E11.65' OR CODE = 'E11.22')
+    AND EVENT_DATE BETWEEN '2023-01-01' AND '2025-12-31'
+)
+.ft R
+.fi
+.NH 2
+3.3 IndexCohort
+.PP
+IndexCohort joins matching events to Patient_Info and assigns a T0 date to
+each eligible patient. The current implementation uses the minimum matching
+event date as T0_DATE.
+.PP
+.nf
+.ft CR
+IndexCohort AS (
+  SELECT p.OH_PID, MIN(i.EVENT_DATE) AS T0_DATE
+  FROM Patient_Info p
+  JOIN IndexRule1 i ON i.OH_PID = p.OH_PID
+  GROUP BY p.OH_PID
+)
+.ft R
+.fi
+.PP
+If there are multiple index rules, the query adds EXISTS checks for each rule
+and combines them with the configured AND or OR joiners.
+.NH 2
+3.4 BasePatients
+.PP
+BasePatients applies demographic criteria to the index cohort. It retains the
+patient columns and the calculated T0 date.
+.PP
+.nf
+.ft CR
+BasePatients AS (
+  SELECT p.*, i.T0_DATE
+  FROM Patient_Info p
+  JOIN IndexCohort i ON i.OH_PID = p.OH_PID
+  WHERE DATEDIFF(YEAR, p.BIRTH_DATE, GETDATE()) >= 18
+)
+.ft R
+.fi
+.PP
+The supported demographic filters are minimum age, maximum age, and sex.
+.NH 2
+3.5 Inclusion Criteria
+.PP
+Each inclusion rule becomes a correlated EXISTS subquery. The event must
+belong to the current patient, match the rule, and satisfy any timing window
+relative to T0_DATE.
+.PP
+For example, the diabetes preset requires an HbA1c result within 180 days and
+metformin within 90 days after T0:
+.PP
+.nf
+.ft CR
+EXISTS (
+  SELECT 1 FROM AllEvents e
+  WHERE e.OH_PID = p.OH_PID
+    AND e.DOMAIN = 'lab'
+    AND e.CODE = 'HBA1C'
+    AND DATEDIFF(DAY, p.T0_DATE, e.EVENT_DATE) BETWEEN 0 AND 180
+)
+AND EXISTS (
+  SELECT 1 FROM AllEvents e
+  WHERE e.OH_PID = p.OH_PID
+    AND e.DOMAIN = 'drug'
+    AND e.CODE = 'MET500'
+    AND DATEDIFF(DAY, p.T0_DATE, e.EVENT_DATE) BETWEEN 0 AND 90
+)
+.ft R
+.fi
+.NH 2
+3.6 Exclusion Criteria
+.PP
+Exclusion rules are also EXISTS subqueries, but the combined expression is
+negated. Therefore, a patient is removed when any configured exclusion event
+is found by default.
+.PP
+.nf
+.ft CR
+AND NOT EXISTS (
+  SELECT 1 FROM AllEvents e
+  WHERE e.OH_PID = p.OH_PID
+    AND e.DOMAIN = 'diagnosis'
+    AND e.CODE = 'N18.3'
+    AND DATEDIFF(DAY, p.T0_DATE, e.EVENT_DATE) BETWEEN -365 AND 0
+)
+.ft R
+.fi
+.NH 1
+4. Feasibility Count Query
+.PP
+SQL Server mode wraps the CTEs in a single SELECT that produces staged
+attrition counts:
+.PP
+.nf
+.ft CR
+SELECT
+  (SELECT COUNT(*) FROM Patient_Info) AS totalPatients,
+  (SELECT COUNT(*) FROM IndexCohort) AS indexEligibleCount,
+  (SELECT COUNT(*) FROM BasePatients) AS demographicCount,
+  (...) AS inclusionCount,
+  (...) AS finalCount
+.ft R
+.fi
+.PP
+The values mean:
+.IP \(bu 2
+totalPatients: all rows in Patient_Info.
+.IP \(bu 2
+indexEligibleCount: patients with at least one matching T0 event.
+.IP \(bu 2
+demographicCount: T0 patients remaining after age and sex filters.
+.IP \(bu 2
+inclusionCount: demographic patients satisfying all inclusion logic.
+.IP \(bu 2
+finalCount: patients remaining after inclusion and exclusion logic.
+.NH 1
+5. Operator Translation
+.PP
+The condition builder translates filter types into SQL expressions:
+.IP \(bu 2
+Text: equality, inequality, LIKE, starts-with, ends-with, and empty checks.
+.IP \(bu 2
+Numbers: equality, comparisons, ranges, and NULL checks.
+.IP \(bu 2
+Dates: exact date, before/after, ranges, today, and this month.
+.IP \(bu 2
+Select fields: equality, IN, NOT IN, and empty checks.
+.IP \(bu 2
+Days from T0: DATEDIFF(DAY, p.T0_DATE, e.EVENT_DATE).
+.PP
+Text values are quoted and apostrophes are escaped. Numeric values are
+converted before being inserted into the SQL string. The query builder is
+still a draft string generator rather than a parameterized production query.
+.NH 1
+6. Other SQL Queries
+.PP
+The project has additional SQL outside the cohort count query:
+.IP \(bu 2
+Dictionary bootstrap queries aggregate code, name, group, and occurrence
+counts from Diagnosis, Laboratory, and Medication.
+.IP \(bu 2
+SQL Server app-storage queries manage users, sessions, OTPs, saved cohorts,
+audit sessions, and feasibility run logs.
+.IP \(bu 2
+tests/sql-initial-setup.sql creates the clinical and application tables plus
+indexes intended to support these queries.
+.NH 1
+7. Important Limitations
+.IP \(bu 2
+The generated SQL is a feasibility-study draft and should be reviewed before
+use against real clinical data.
+.IP \(bu 2
+SQL mode returns counts and attrition, not patient-level result rows.
+.IP \(bu 2
+Age uses GETDATE() and BIRTH_DATE rather than an exact age-at-T0 calculation.
+.IP \(bu 2
+When multiple T0 rules are matched, T0_DATE is currently the minimum matching
+event date.
+.IP \(bu 2
+The query targets the project's local guide schema, not OMOP CDM tables.
+.PP
+Primary implementation files:
+.IP \(bu 2
+src/sqlBuilder.js - SQL generation.
+.IP \(bu 2
+src/server/sqlServerFeasibilityRepository.js - SQL Server execution.
+.IP \(bu 2
+src/cohortEngine.js - equivalent JSON evaluation.
+.IP \(bu 2
+tests/sql-initial-setup.sql - starter SQL schema.
