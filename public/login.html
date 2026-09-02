@@ -15,13 +15,13 @@
           Login is required so feasibility runs can be tied to a user in the audit log.
         </p>
 
-        <div class="auth-tabs" aria-label="Authentication options">
-          <button class="ghost active" type="button" data-auth-panel="loginPanel">Sign in</button>
-          <button class="ghost" type="button" data-auth-panel="signupPanel">Create user</button>
-          <button class="ghost" type="button" data-auth-panel="forgotPanel">Forgot password</button>
+        <div class="auth-tabs" role="tablist" aria-label="Authentication options">
+          <button id="loginTab" class="ghost active" type="button" role="tab" aria-controls="loginPanel" aria-selected="true" data-auth-panel="loginPanel">Sign in</button>
+          <button id="signupTab" class="ghost" type="button" role="tab" aria-controls="signupPanel" aria-selected="false" data-auth-panel="signupPanel">Create user</button>
+          <button id="forgotTab" class="ghost" type="button" role="tab" aria-controls="forgotPanel" aria-selected="false" data-auth-panel="forgotPanel">Forgot password</button>
         </div>
 
-        <section id="loginPanel" class="auth-panel">
+        <section id="loginPanel" class="auth-panel" role="tabpanel" aria-labelledby="loginTab">
         <form id="loginForm" class="login-form">
           <label class="field">
             <span>Email</span>
@@ -31,19 +31,19 @@
             <span>Password</span>
             <input id="password" type="password" autocomplete="current-password" required>
           </label>
-          <button class="primary" type="submit">Login with email</button>
+          <button class="primary" type="submit">Sign in with email</button>
         </form>
 
         <div class="login-divider"><span>or</span></div>
 
         <a class="google-login" href="/api/auth/google">Continue with Google</a>
 
-        <p id="loginStatus" class="helper-text">
+        <p id="loginStatus" class="helper-text" aria-live="polite">
           Demo account: <code>researcher@example.com</code> / <code>ChangeMe123!</code>
         </p>
         </section>
 
-        <section id="signupPanel" class="auth-panel" hidden>
+        <section id="signupPanel" class="auth-panel" role="tabpanel" aria-labelledby="signupTab" hidden>
           <form id="signupForm" class="login-form">
             <label class="field">
               <span>Name</span>
@@ -66,10 +66,10 @@
             </label>
             <button class="primary" type="submit">Confirm OTP and create user</button>
           </form>
-          <p id="signupStatus" class="helper-text">Create user requires OTP confirmation from email.</p>
+          <p id="signupStatus" class="helper-text" aria-live="polite">Create user requires OTP confirmation from email.</p>
         </section>
 
-        <section id="forgotPanel" class="auth-panel" hidden>
+        <section id="forgotPanel" class="auth-panel" role="tabpanel" aria-labelledby="forgotTab" hidden>
           <form id="forgotForm" class="login-form">
             <label class="field">
               <span>Email</span>
@@ -88,7 +88,7 @@
             </label>
             <button class="primary" type="submit">Confirm OTP and reset password</button>
           </form>
-          <p id="forgotStatus" class="helper-text">If the email exists, an OTP will be sent.</p>
+          <p id="forgotStatus" class="helper-text" aria-live="polite">If the email exists, an OTP will be sent.</p>
         </section>
       </section>
     </main>

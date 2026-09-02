@@ -103,9 +103,22 @@ function bindElements() {
 }
 
 function bindEvents() {
-  els.cohortForm.addEventListener('submit', (event) => {
+  els.cohortForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    void run({ logRun: true }).catch(reportRuntimeError);
+    const submitButton = els.cohortForm.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Running feasibility count...';
+    submitButton.setAttribute('aria-busy', 'true');
+    els.heroContext.textContent = 'Running the feasibility query.';
+    try {
+      await run({ logRun: true });
+    } catch (error) {
+      reportRuntimeError(error);
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = 'Run feasibility count';
+      submitButton.removeAttribute('aria-busy');
+    }
   });
   els.requestCohortForm.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -422,12 +435,13 @@ async function submitCohortRequest() {
   const requestReason = els.requestReason.value.trim();
 
   if (!email || !name || !requestReason) {
-    setRequestCohortStatus('Email, name-surname, and request reason are required.', true);
+    setRequestCohortStatus('Email, name, and reason for request are required.', true);
     return;
   }
 
   els.requestCohort.disabled = true;
-  els.requestCohort.textContent = 'Sending...';
+  els.requestCohort.textContent = 'Sending request...';
+  els.requestCohort.setAttribute('aria-busy', 'true');
 
   try {
     state.config = readConfigFromForm({ validate: true });
@@ -465,7 +479,8 @@ async function submitCohortRequest() {
     setRequestCohortStatus(error?.message || 'Unable to send cohort request email.', true);
   } finally {
     els.requestCohort.disabled = false;
-    els.requestCohort.textContent = 'Request Cohort';
+    els.requestCohort.textContent = 'Request cohort';
+    els.requestCohort.removeAttribute('aria-busy');
   }
 }
 
@@ -532,15 +547,15 @@ function buildWorkflowSvg(steps) {
   const startY = 34;
   const gap = 105;
   const colors = {
-    blue: { fill: '#dbeafe', stroke: '#2563eb', text: '#1e3a8a' },
-    amber: { fill: '#fef3c7', stroke: '#d97706', text: '#92400e' },
-    teal: { fill: '#ccfbf1', stroke: '#0f766e', text: '#134e4a' }
+    neutral: { fill: '#edf3f2', stroke: '#8ca5a1', text: '#334541' },
+    warning: { fill: '#f7efdf', stroke: '#8a5b16', text: '#6c450d' },
+    teal: { fill: '#dcebea', stroke: '#176b67', text: '#115955' }
   };
 
   const nodes = steps.map((step, index) => {
     const previous = index === 0 ? step.count : steps[index - 1].count;
     const drop = Math.max(0, previous - step.count);
-    const palette = step.final ? colors.teal : drop > 0 ? colors.amber : colors.blue;
+    const palette = step.final ? colors.teal : drop > 0 ? colors.warning : colors.neutral;
     const width = step.final ? finalWidth : nodeWidth;
     const height = step.final ? finalHeight : nodeHeight;
     const x = centerX - width / 2;
@@ -554,11 +569,11 @@ function buildWorkflowSvg(steps) {
     const badgeY = node.y + node.height + 18;
     const badgeTextY = badgeY + 16;
     const badge = drop > 0
-      ? `<rect x="276" y="${badgeY}" width="128" height="24" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="0.5"/>
-         <text x="340" y="${badgeTextY}" text-anchor="middle" font-size="12" fill="#92400e">▼ -${drop} excluded</text>`
-      : `<text x="340" y="${badgeTextY}" text-anchor="middle" font-size="12" fill="#475569">▼ 0 excluded</text>`;
+      ? `<rect x="276" y="${badgeY}" width="128" height="24" rx="8" fill="#f7efdf" stroke="#8a5b16" stroke-width="0.5"/>
+         <text x="340" y="${badgeTextY}" text-anchor="middle" font-size="12" fill="#6c450d">▼ -${drop} excluded</text>`
+      : `<text x="340" y="${badgeTextY}" text-anchor="middle" font-size="12" fill="#5c6c6a">▼ 0 excluded</text>`;
     return `
-      <line x1="340" y1="${node.y + node.height}" x2="340" y2="${next.y - 12}" stroke="#64748b" stroke-width="1" marker-end="url(#arrowhead)"/>
+      <line x1="340" y1="${node.y + node.height}" x2="340" y2="${next.y - 12}" stroke="#71817f" stroke-width="1" marker-end="url(#arrowhead)"/>
       ${badge}
     `;
   }).join('');
@@ -575,19 +590,19 @@ function buildWorkflowSvg(steps) {
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 620" role="img" aria-label="Cohort attrition workflow diagram">
       <defs>
         <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" fill="#64748b"></path>
+          <path d="M0,0 L8,4 L0,8 Z" fill="#71817f"></path>
         </marker>
       </defs>
-      <rect x="0" y="0" width="680" height="620" fill="#fffaf0"/>
+      <rect x="0" y="0" width="680" height="620" fill="#f4f7f7"/>
       ${arrows}
       ${nodeMarkup}
       <g aria-label="Legend">
-        <rect x="74" y="572" width="16" height="16" fill="${colors.blue.fill}" stroke="${colors.blue.stroke}" stroke-width="0.5"/>
-        <text x="98" y="585" font-size="12" fill="#334155">No patient drop</text>
-        <rect x="254" y="572" width="16" height="16" fill="${colors.amber.fill}" stroke="${colors.amber.stroke}" stroke-width="0.5"/>
-        <text x="278" y="585" font-size="12" fill="#334155">Patient drop</text>
+        <rect x="74" y="572" width="16" height="16" fill="${colors.neutral.fill}" stroke="${colors.neutral.stroke}" stroke-width="0.5"/>
+        <text x="98" y="585" font-size="12" fill="#334541">No patient drop</text>
+        <rect x="254" y="572" width="16" height="16" fill="${colors.warning.fill}" stroke="${colors.warning.stroke}" stroke-width="0.5"/>
+        <text x="278" y="585" font-size="12" fill="#334541">Patient drop</text>
         <rect x="414" y="572" width="16" height="16" fill="${colors.teal.fill}" stroke="${colors.teal.stroke}" stroke-width="0.5"/>
-        <text x="438" y="585" font-size="12" fill="#334155">Final cohort</text>
+        <text x="438" y="585" font-size="12" fill="#334541">Final cohort</text>
       </g>
     </svg>
   `.trim();
@@ -608,7 +623,7 @@ async function downloadPng() {
     canvas.width = 1360;
     canvas.height = 1240;
     const context = canvas.getContext('2d');
-    context.fillStyle = '#fffaf0';
+    context.fillStyle = '#f4f7f7';
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
     canvas.toBlob((blob) => {

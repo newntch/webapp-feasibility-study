@@ -11,9 +11,10 @@
       <nav class="topbar" aria-label="Application">
         <a class="brand" href="/">Cohort Lens</a>
         <div class="nav-actions">
+          <a class="nav-link" href="/" aria-current="page">Cohort builder</a>
           <a class="nav-link" href="/dictionary.html" target="_blank" rel="noreferrer">Master dictionary</a>
           <a class="nav-link" href="/logs.html">Session logs</a>
-          <div id="authStatus" class="auth-status"></div>
+          <div id="authStatus" class="auth-status" aria-live="polite"></div>
           <span class="pill">Synthetic data only</span>
         </div>
       </nav>
@@ -29,7 +30,7 @@
         <aside class="hero-card">
           <span class="metric-label">Final cohort</span>
           <strong id="heroCount">0</strong>
-          <span id="heroContext">Waiting for synthetic data</span>
+          <span id="heroContext" aria-live="polite">Waiting for synthetic data</span>
         </aside>
       </section>
     </header>
@@ -43,8 +44,9 @@
 
         <form id="cohortForm">
           <fieldset class="card">
+            <legend class="sr-only">T0 index event conditions</legend>
             <div class="card-title">
-              <legend>T0 index event conditions</legend>
+              <h3 class="group-title" aria-hidden="true">T0 index event conditions</h3>
               <button id="addIndexCondition" type="button" class="small">Add T0 condition</button>
             </div>
             <p class="helper-text">Use nested groups to describe the qualifying T0 event. The first matching T0 rule in list order sets the cohort entry date used by inclusion and exclusion timing. Look up diagnosis, lab, and drug codes in the <a href="/dictionary.html" target="_blank" rel="noreferrer">master dictionary</a>.</p>
@@ -86,7 +88,7 @@
           <section class="criteria-grid">
             <div class="card">
               <div class="card-title">
-                <legend>Inclusion criteria</legend>
+                <h3 class="group-title">Inclusion criteria</h3>
                 <button id="addInclusion" type="button" class="small">Add condition</button>
               </div>
               <p class="helper-text">For timing relative to T0, use the <code>Days from T0</code> field. Negative values are before T0 and positive values are after T0.</p>
@@ -94,7 +96,7 @@
             </div>
             <div class="card">
               <div class="card-title">
-                <legend>Exclusion criteria</legend>
+                <h3 class="group-title">Exclusion criteria</h3>
                 <button id="addExclusion" type="button" class="small">Add condition</button>
               </div>
               <p class="helper-text">Exclusion rules run after inclusion logic. Use OR between rules when any one matching event should exclude the patient.</p>
@@ -132,7 +134,7 @@
         <section class="panel sql-panel" aria-labelledby="sqlTitle">
           <div class="section-heading sql-heading">
             <div>
-              <p class="eyebrow">SQL Builder</p>
+              <p class="eyebrow">SQL builder</p>
               <h2 id="sqlTitle">Generated SQL</h2>
             </div>
             <button id="copySql" class="small" type="button">Copy SQL</button>
@@ -144,7 +146,7 @@
         <section class="panel request-panel" aria-labelledby="requestTitle">
           <div class="section-heading">
             <p class="eyebrow">Request</p>
-            <h2 id="requestTitle">Request Cohort</h2>
+            <h2 id="requestTitle">Request cohort</h2>
           </div>
           <p class="helper-text">Send the latest cohort summary and attrition workflow to the requester email.</p>
           <form id="requestCohortForm" class="request-cohort-form">
@@ -154,17 +156,17 @@
                 <input id="requestEmail" type="email" autocomplete="email" placeholder="researcher@example.com" required>
               </label>
               <label class="field">
-                <span>Name-surname</span>
+                <span>Name</span>
                 <input id="requestName" type="text" autocomplete="name" placeholder="Demo Researcher" required>
               </label>
             </div>
             <label class="field wide">
-              <span>Request reason feasibility study</span>
+              <span>Reason for request</span>
               <textarea id="requestReason" rows="4" placeholder="State the feasibility-study reason for requesting this cohort summary." required></textarea>
             </label>
             <div class="request-cohort-actions">
-              <button id="requestCohort" class="primary" type="submit">Request Cohort</button>
-              <p id="requestCohortStatus" class="helper-text">The email includes cohort summary, attrition, and the workflow SVG attachment.</p>
+              <button id="requestCohort" class="primary" type="submit">Request cohort</button>
+              <p id="requestCohortStatus" class="helper-text" aria-live="polite">The email includes cohort summary, attrition, and the workflow SVG attachment.</p>
             </div>
           </form>
         </section>
@@ -195,7 +197,7 @@
             <button id="loadSavedCohort" class="ghost" type="button">Load selected</button>
             <button id="deleteSavedCohort" class="ghost danger" type="button">Delete selected</button>
           </div>
-          <p id="savedCohortStatus" class="helper-text">Saved cohorts stay in this browser.</p>
+          <p id="savedCohortStatus" class="helper-text" aria-live="polite">Saved cohorts stay in this browser.</p>
         </section>
       </section>
     </main>

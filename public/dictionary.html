@@ -12,9 +12,9 @@
         <a class="brand" href="/">Cohort Lens</a>
         <div class="nav-actions">
           <a class="nav-link" href="/">Cohort builder</a>
+          <a class="nav-link" href="/dictionary.html" aria-current="page">Master dictionary</a>
           <a class="nav-link" href="/logs.html">Session logs</a>
-          <div id="authStatus" class="auth-status"></div>
-          <span class="pill">Master dictionary</span>
+          <div id="authStatus" class="auth-status" aria-live="polite"></div>
         </div>
       </nav>
       <section class="hero-grid">
@@ -48,7 +48,7 @@
           </label>
         </div>
         <p id="dictionaryHint" class="helper-text">Search results come from the local checked-in dictionary snapshot.</p>
-        <div id="dictionaryWarning" class="helper-text" hidden></div>
+        <div id="dictionaryWarning" class="helper-text" aria-live="polite" hidden></div>
         <div id="dictionarySources" class="dictionary-source-list"></div>
       </section>
 

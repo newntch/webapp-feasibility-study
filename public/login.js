@@ -115,9 +115,23 @@ forgotOtpForm.addEventListener('submit', async (event) => {
 });
 
 function bindAuthTabs() {
-  document.querySelectorAll('[data-auth-panel]').forEach((button) => {
+  const tabs = [...document.querySelectorAll('[data-auth-panel]')];
+  tabs.forEach((button, index) => {
     button.addEventListener('click', () => showAuthPanel(button.dataset.authPanel));
+    button.addEventListener('keydown', (event) => {
+      const keyOffsets = { ArrowLeft: -1, ArrowRight: 1 };
+      if (!(event.key in keyOffsets) && event.key !== 'Home' && event.key !== 'End') return;
+      event.preventDefault();
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? tabs.length - 1
+          : (index + keyOffsets[event.key] + tabs.length) % tabs.length;
+      tabs[nextIndex].focus();
+      showAuthPanel(tabs[nextIndex].dataset.authPanel);
+    });
   });
+  showAuthPanel('loginPanel');
 }
 
 function showAuthPanel(panelId) {
@@ -125,7 +139,10 @@ function showAuthPanel(panelId) {
     panel.hidden = panel.id !== panelId;
   });
   document.querySelectorAll('[data-auth-panel]').forEach((button) => {
-    button.classList.toggle('active', button.dataset.authPanel === panelId);
+    const isActive = button.dataset.authPanel === panelId;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-selected', String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
   });
 }
 
