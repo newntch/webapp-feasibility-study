@@ -29,17 +29,17 @@ When implementation starts, use a predictable layout:
 Favor small, focused modules and keep related tests near the feature they validate or under `tests/` with matching names.
 
 ## Build, Test, and Development Commands
-This scaffold now uses a no-dependency static webapp with Node.js scripts.
+This project uses an Express backend with Node.js scripts.
 
-- `npm run dev` starts a local static server at `http://localhost:4173`.
-- `npm test` runs the cohort feasibility engine tests.
+- `pnpm dev` starts the local Express server at `http://localhost:4173`.
+- `pnpm test` runs the cohort feasibility engine and HTTP contract tests.
 
 Scope Git commands to this folder because the Git root is the parent directory:
 - `git status -- webapp-feasibility-study`
 - `git diff -- webapp-feasibility-study`
 - `git add webapp-feasibility-study/`
 
-If a larger Node-based app is added later, preserve explicit scripts such as `npm run dev`, `npm test`, and `npm run lint`.
+Preserve explicit scripts such as `pnpm dev`, `pnpm test`, and `pnpm lint` when tooling is expanded.
 
 ## Coding Style & Naming Conventions
 Use 2 spaces for indentation in Markdown, JSON, YAML, and frontend code unless the selected stack has a stronger convention. Name files by purpose:

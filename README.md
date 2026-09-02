@@ -7,8 +7,8 @@ Repository: https://github.com/Burinboo256/webapp-feasibility-study
 ## Commands
 
 - `pnpm install` installs runtime dependencies.
-- `pnpm dev` starts a local static server at `http://localhost:4173`.
-- `pnpm test` runs the cohort feasibility engine tests.
+- `pnpm dev` starts the local Express server at `http://localhost:4173`.
+- `pnpm test` runs the cohort feasibility engine and HTTP contract tests.
 - `pnpm sync-dictionary` refreshes the local master dictionary snapshot from the configured Google Sheets.
 - `node scripts/hash-password.mjs "new-password"` generates a bcrypt hash for your local `data/users.json`.
 
@@ -129,7 +129,7 @@ pnpm dev
 
 ## Cloud Deployment Setup
 
-This app now needs the Node server in `scripts/dev-server.mjs`; do not deploy it as static files only if login, OTP, Google OAuth, or protected audit pages are required.
+This app needs the Express server started by `scripts/dev-server.mjs`; do not deploy it as static files only if login, OTP, Google OAuth, or protected audit pages are required.
 
 Typical cloud setup:
 
