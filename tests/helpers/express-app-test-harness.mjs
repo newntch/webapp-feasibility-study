@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 
-import { createExpressApp } from '../../src/server/createExpressApp.js';
+import { createExpressApp } from '../../src/server/http/createExpressApp.js';
 
 export const testUser = {
   id: 'user-1',

@@ -1,6 +1,6 @@
 # Diagnosis Feasibility Study Webapp
 
-Node.js prototype for cohort feasibility research. It uses synthetic clinical data generated from `data_dictionary.md`, supports ATLAS/OHDSI-style index events plus i2b2-style inclusion and exclusion panels, and now includes a reusable Airtable-style nested condition builder with a separate diagnosis/lab/drug master dictionary page.
+Node.js prototype for cohort feasibility research. It uses synthetic clinical data generated from `docs/references/data-dictionary.md`, supports ATLAS/OHDSI-style index events plus i2b2-style inclusion and exclusion panels, and now includes a reusable Airtable-style nested condition builder with a separate diagnosis/lab/drug master dictionary page.
 
 Repository: https://github.com/Burinboo256/webapp-feasibility-study
 
@@ -11,6 +11,25 @@ Repository: https://github.com/Burinboo256/webapp-feasibility-study
 - `pnpm test` runs the cohort feasibility engine and HTTP contract tests.
 - `pnpm sync-dictionary` refreshes the local master dictionary snapshot from the configured Google Sheets.
 - `node scripts/hash-password.mjs "new-password"` generates a bcrypt hash for your local `data/users.json`.
+
+## Project Structure
+
+```text
+public/              Static HTML, browser assets, and synthetic browser data
+src/core/            Cohort, dictionary, filter, and SQL domain logic
+src/server/          Express config, HTTP setup, routes, services, and repositories
+database/sql/        SQL Server initialization artifacts
+tests/unit/          Core and server unit tests
+tests/integration/   HTTP, UI, and database artifact contract tests
+docs/design/         Current architecture and adapter notes
+docs/references/     Data dictionaries and supporting reference documents
+scripts/             Development and maintenance entrypoints
+config/              Checked-in configuration templates
+data/                Local runtime state and OMOP research datasets
+temp/                Temporary working files
+```
+
+Browser code imports only the explicitly allowlisted domain modules exposed under `/modules/`; server implementation and configuration files are never served as static assets.
 
 ## Local Setup
 

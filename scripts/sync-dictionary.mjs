@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { fetchRemoteDictionary } from '../src/remoteDictionary.js';
+import { fetchRemoteDictionary } from '../src/core/dictionary/remoteDictionary.js';
 
 const root = resolve(process.cwd());
 const outputDir = join(root, 'public', 'data');

@@ -1,10 +1,10 @@
 import { resolve } from 'node:path';
-import { createExpressApp } from '../src/server/createExpressApp.js';
-import { createFeasibilityService } from '../src/server/createFeasibilityService.js';
-import { createAppStorageService } from '../src/server/createAppStorageService.js';
-import { loadServerConfig } from '../src/server/config.js';
-import { createCohortRequestDeliveryService } from '../src/server/cohortRequestDelivery.js';
-import { createOtpDeliveryService } from '../src/server/otpDelivery.js';
+import { createExpressApp } from '../src/server/http/createExpressApp.js';
+import { createFeasibilityService } from '../src/server/services/createFeasibilityService.js';
+import { createAppStorageService } from '../src/server/services/createAppStorageService.js';
+import { loadServerConfig } from '../src/server/config/config.js';
+import { createCohortRequestDeliveryService } from '../src/server/services/cohortRequestDelivery.js';
+import { createOtpDeliveryService } from '../src/server/services/otpDelivery.js';
 
 const root = resolve(process.cwd());
 const config = await loadServerConfig({ root });
