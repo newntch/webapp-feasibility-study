@@ -39,6 +39,7 @@ The server creates local session, OTP, saved-cohort, and audit-log files under
 - [Setup and configuration](docs/setup-and-configuration.md)
 - [Deployment and storage](docs/deployment-and-storage.md)
 - [Product and usage](docs/product-and-usage.md)
+- [Project overview diagrams](docs/design/project-overview.md)
 - [Design notes](docs/design/design-notes.md)
 - [OMOP CDM adapter](docs/design/omop-cdm-adapter.md)
 - [Data dictionary and references](docs/references/data-dictionary.md)
