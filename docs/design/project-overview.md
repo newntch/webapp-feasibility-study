@@ -151,7 +151,7 @@ flowchart TD
   Bootstrap --> Input[กรอก T0 / index event<br/>ช่วงวันที่ / demographics<br/>inclusion / exclusion]
   Input --> Validate{Filter tree<br/>ผ่าน validation?}
   Validate -- ไม่ผ่าน --> Error[แสดง validation error<br/>ไม่ส่ง query]
-  Validate -- ผ่าน --> Request[POST /api/feasibility/run<br/>{ config }]
+  Validate -- ผ่าน --> Request[POST /api/feasibility/run<br/>payload: config]
   Request --> RequireUser[requireUser ตรวจ session]
   RequireUser --> Service[FeasibilityService<br/>เลือก repository ตาม clinicalDataSource]
 
@@ -293,4 +293,3 @@ Local storage จำกัดข้อมูลล่าสุดไว้ที
 | `GET /api/logs` | ต้องมี session | อ่าน log ของ user ปัจจุบัน |
 | `DELETE /api/logs` | ต้องมี session | ลบ log ของ user ปัจจุบัน |
 | `GET/POST /api/cohorts` | ต้องมี session | อ่านหรือบันทึก saved cohort |
-
