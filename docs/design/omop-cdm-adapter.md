@@ -1,10 +1,8 @@
 # OMOP CDM adapter
 
-Django queries the PostgreSQL `clinical_db` copy of the EHRShot OMOP CDM v5.3.1
-snapshot. The DuckDB file is an import source, not a live application database.
-The web database role is read-only; import uses a separate role. Clinical
-queries require a completed import metadata record that captures source and
-vocabulary provenance.
+Django queries PostgreSQL `clinical_db`, which must contain OMOP CDM v5.3.1.
+The web database role is read-only. Clinical queries verify the required tables
+and CDM version before execution.
 
 | Cohort field | OMOP source |
 | --- | --- |

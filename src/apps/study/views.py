@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 from django.db import connections, models
 from django.utils import timezone
 
-from apps.study.clinical import concept_catalog, run_feasibility
+from apps.study.clinical import ensure_clinical_ready, run_feasibility
 from apps.study.clinical_sql import build_count_query
 from apps.study.models import AuditSession, FeasibilityRun, SavedCohort
 from config.http import body_json, public_user, response, timestamp
@@ -169,22 +169,8 @@ def logs(request):
         {
             "sessions": [audit_json(item) for item in sessions],
             "runs": [run_json(item) for item in runs],
-            "appStorage": "postgres",
         }
     )
-
-
-def bootstrap(request):
-    denied = require_user(request)
-    if denied:
-        return denied
-    try:
-        catalog = concept_catalog()
-        return response(
-            {"dataSource": "omop-postgres", "appStorage": "postgres", "conceptCatalog": catalog}
-        )
-    except Exception:
-        return response({"error": "Unable to load clinical concept catalog"}, 503)
 
 
 def feasibility_run(request):
@@ -265,10 +251,7 @@ def health(request):
         with connections["default"].cursor() as cursor:
             cursor.execute("SELECT 1")
             cursor.fetchone()
-        with connections["clinical"].cursor() as cursor:
-            cursor.execute("SELECT 1 FROM import_metadata WHERE source_name = %s", ["ehrshot_omop"])
-            if cursor.fetchone() is None:
-                return response({"ok": False}, 503)
+        ensure_clinical_ready()
         return response({"ok": True})
     except Exception:
         return response({"ok": False}, 503)

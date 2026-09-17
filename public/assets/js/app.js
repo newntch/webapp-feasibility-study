@@ -1,6 +1,5 @@
-import { defaultConfig, normalizeCohortConfig } from '/modules/cohort/cohortEngine.js';
-import { buildSql } from '/modules/sql/sqlBuilder.js';
-import { buildOmopPreviewSql } from '/modules/sql/omopSqlBuilder.js';
+import { defaultConfig, normalizeCohortConfig } from '/modules/cohort/cohortConfig.js';
+import { criteriaSummary } from '/modules/cohort/criteriaSummary.js';
 import {
   FILTER_FIELDSETS,
   conditionValuesFromTree,
@@ -19,8 +18,6 @@ import { createFilterBuilder } from './filterBuilder.js';
 import { csrfHeaders } from './csrf.js';
 
 const state = {
-  dataSource: 'json',
-  appStorage: 'local',
   savedCohorts: [],
   config: defaultConfig(),
   currentSql: '',
@@ -36,9 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!user) return;
     renderAuthUser(user, els.authStatus);
     await getCurrentSession();
-    const bootstrap = await loadBootstrap();
-    state.dataSource = bootstrap.dataSource || 'json';
-    state.appStorage = bootstrap.appStorage || 'local';
     writeConfigToForm(state.config);
     prefillRequestCohortForm(user);
     bindEvents();
@@ -48,15 +42,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     reportRuntimeError(error);
   }
 });
-
-async function loadBootstrap() {
-  const response = await fetch('/api/bootstrap', { credentials: 'same-origin' });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload.error || 'Unable to load bootstrap data.');
-  }
-  return payload;
-}
 
 function bindElements() {
   for (const id of [
@@ -222,7 +207,7 @@ function renderSavedCohorts(selectedId = '') {
   els.deleteSavedCohort.disabled = !hasFilteredCohorts;
 
   if (savedCohorts.length === 0) {
-    setSavedCohortStatus(`No saved cohorts yet. Storage mode: ${state.appStorage}.`);
+    setSavedCohortStatus('No saved cohorts yet.');
   } else if (!hasFilteredCohorts) {
     setSavedCohortStatus(`No saved cohorts match "${els.savedCohortSearch.value}".`);
   } else {
@@ -389,7 +374,6 @@ async function executeFeasibility(config) {
   if (!response.ok) {
     throw new Error(payload.error || 'Unable to run feasibility query.');
   }
-  state.dataSource = payload.dataSource || state.dataSource;
   return { ...payload.result, datasetVersion: payload.metadata?.datasetVersion || '' };
 }
 
@@ -457,7 +441,6 @@ async function submitCohortRequest() {
         name,
         requestReason,
         question: state.config.question || '',
-        dataSource: state.dataSource,
         indexEligibleCount: result.indexEligibleCount,
         finalCount: result.finalCount,
         excludedCount: result.excludedCount,
@@ -673,22 +656,15 @@ function sendPrompt(prompt) {
 }
 
 async function renderSql() {
-  let generated;
-  if (state.dataSource === 'omop-postgres') {
-    const response = await fetch('/api/feasibility/preview', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: csrfHeaders({ 'content-type': 'application/json' }),
-      body: JSON.stringify({ config: state.config })
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(payload.error || 'Unable to preview SQL.');
-    generated = { sql: payload.sql, summary: buildOmopPreviewSql(state.config).summary };
-  } else {
-    generated = state.dataSource === 'omop-duckdb'
-      ? buildOmopPreviewSql(state.config)
-      : buildSql(state.config);
-  }
+  const response = await fetch('/api/feasibility/preview', {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: csrfHeaders({ 'content-type': 'application/json' }),
+    body: JSON.stringify({ config: state.config })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(payload.error || 'Unable to preview SQL.');
+  const generated = { sql: payload.sql, summary: criteriaSummary(state.config) };
   state.currentSql = generated.sql;
   els.generatedSql.innerHTML = highlightSql(generated.sql);
   els.sqlSummary.textContent = generated.summary;

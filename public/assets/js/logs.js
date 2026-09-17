@@ -6,11 +6,7 @@ import {
 import { renderAuthUser, requireAuth } from './authClient.js';
 
 const els = {};
-const state = {
-  appStorage: 'local',
-  sessions: [],
-  runs: []
-};
+const state = { sessions: [], runs: [] };
 
 document.addEventListener('DOMContentLoaded', async () => {
   bindElements();
@@ -59,7 +55,6 @@ async function renderLogs() {
   const payload = await readAuditLogs();
   state.sessions = payload.sessions || [];
   state.runs = payload.runs || [];
-  state.appStorage = payload.appStorage || 'local';
   const filteredRuns = filterRuns(state.runs, els.logSearch.value);
 
   els.sessionCount.textContent = state.sessions.length;
@@ -132,7 +127,6 @@ function renderSessionLogs(sessions) {
 function exportLogs() {
   const payload = {
     exportedAt: new Date().toISOString(),
-    appStorage: state.appStorage,
     sessions: state.sessions,
     feasibilityRuns: state.runs
   };

@@ -8,17 +8,16 @@ Researchers need a fast way to estimate whether a clinical study is feasible bef
 
 - ATLAS/OHDSI: index event, cohort entry date, inclusion/exclusion criteria, and attrition-style result review.
 - i2b2: panel-like criteria building across diagnosis, lab, and medication domains.
-- Local schema: all queries use the tables and field names from `docs/references/data-dictionary.md`, not OMOP tables.
+- OMOP CDM: all feasibility queries use the OMOP tables in `clinical_db`.
 
 ## Prototype Decisions
 
-- Use synthetic JSON for development to avoid PHI risk.
-- Keep cohort logic in `src/core/cohort/cohortEngine.js` so it can later move behind an API, SQL generator, or InterSystems IRIS service.
+- Keep clinical data in PostgreSQL and use de-identified data for development.
+- Keep cohort configuration and validation in browser modules; generate and run SQL in Django.
 - Keep the first UI no-dependency and static so the feasibility workflow can be reviewed before choosing a full application stack.
 
 ## Next Backend Evolution
 
-- Translate criteria to parameterized SQL against the source schema or an IRIS mirror.
-- Add vocabulary/concept mapping tables for ICD, local drug codes, and lab test codes.
-- Add saved cohort definitions, audit logs, user access control, and governance review workflow.
+- Add vocabulary/concept mapping tables when the clinical dataset requires them.
+- Add governance review workflow.
 - Add small-cell suppression before showing counts from real patient data.

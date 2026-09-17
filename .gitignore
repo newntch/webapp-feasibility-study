@@ -6,7 +6,6 @@ coverage/
 config/*.json
 !config/*.example.json
 data
-public/data/synthetic-clinical-data.json
 .agents
 .codex
 temp/

@@ -8,12 +8,12 @@ JavaScript modules; no JavaScript package manager or server runtime is needed.
 
 - Python 3.12 or newer and `uv`
 - Docker Compose for the local PostgreSQL databases
-- The EHRShot OMOP v5.3.1 DuckDB source for a first clinical import
+- PostgreSQL backups containing the OMOP CDM v5.3.1 clinical dataset and application data
 
 ## Run locally
 
-Follow [the migration and first-run guide](docs/migration-to-django.md) to
-configure secrets, initialize the databases, and import the source data. Then:
+Follow [the PostgreSQL-only cutover guide](docs/postgres-only-cutover.md) to
+configure secrets and restore or initialize the two databases. Then:
 
 ```bash
 docker compose up -d
@@ -34,15 +34,11 @@ To run Django outside the web container against a reachable PostgreSQL server,
 set the database environment variables in [setup and configuration](docs/setup-and-configuration.md)
 and run `uv run python manage.py runserver 4173`.
 
-`uv run python manage.py sync_dictionary` refreshes the local dictionary
-snapshot from its published CSV sources. This command needs network access;
-the web service does not need it to serve an existing snapshot.
-
 ## Documentation
 
 - [Setup and configuration](docs/setup-and-configuration.md)
 - [Deployment and storage](docs/deployment-and-storage.md)
-- [Django and PostgreSQL migration](docs/migration-to-django.md)
+- [PostgreSQL-only cutover](docs/postgres-only-cutover.md)
 - [Product and usage](docs/product-and-usage.md)
 - [Current architecture](docs/design/project-overview.md)
 - [OMOP CDM adapter](docs/design/omop-cdm-adapter.md)

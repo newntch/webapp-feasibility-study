@@ -49,8 +49,7 @@ export async function readAuditLogs() {
   }
   return {
     sessions: payload.sessions || [],
-    runs: payload.runs || [],
-    appStorage: payload.appStorage || 'local'
+    runs: payload.runs || []
   };
 }
 

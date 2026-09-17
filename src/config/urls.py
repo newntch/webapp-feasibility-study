@@ -12,16 +12,13 @@ PAGES = {
     "index.html": "index.html",
     "login.html": "login.html",
     "logs.html": "logs.html",
-    "dictionary.html": "dictionary.html",
 }
 MODULES = {
     "cohort/advancedConditions.js",
-    "cohort/cohortEngine.js",
-    "dictionary/masterDictionary.js",
+    "cohort/cohortConfig.js",
+    "cohort/criteriaSummary.js",
     "filters/filterBuilderBehavior.js",
     "filters/filterBuilderDefaults.js",
-    "sql/omopSqlBuilder.js",
-    "sql/sqlBuilder.js",
 }
 
 
@@ -51,11 +48,6 @@ def asset(request, name):
     return FileResponse(target.open("rb"), content_type=mime)
 
 
-def dictionary_data(request):
-    target = settings.BASE_DIR / "public" / "data" / "master-dictionary.json"
-    return FileResponse(target.open("rb"), content_type="application/json")
-
-
 def unknown_api(request):
     return response({"error": "API route not found"}, 404)
 
@@ -65,7 +57,6 @@ urlpatterns = [
     path("index.html", page, {"name": "index.html"}),
     path("login.html", page, {"name": "login.html"}),
     path("logs.html", page, {"name": "logs.html"}),
-    path("dictionary.html", page, {"name": "dictionary.html"}),
     path("api/auth/me", auth.me),
     path("api/auth/login", auth.credential_login),
     path("api/auth/logout", auth.credential_logout),
@@ -75,7 +66,6 @@ urlpatterns = [
     path("api/auth/password/confirm", auth.password_confirm),
     path("api/auth/google", auth.google_start),
     path("api/auth/google/callback", auth.google_callback),
-    path("api/bootstrap", study.bootstrap),
     path("api/health", study.health),
     path("api/feasibility/run", study.feasibility_run),
     path("api/feasibility/preview", study.feasibility_preview),
@@ -87,6 +77,5 @@ urlpatterns = [
     path("api/cohorts/<str:cohort_id>", study.cohort_delete),
     re_path(r"^modules/(?P<name>[^?]+)$", module),
     re_path(r"^assets/(?P<name>[^?]+)$", asset),
-    path("data/master-dictionary.json", dictionary_data),
     re_path(r"^api/.*$", unknown_api),
 ]
