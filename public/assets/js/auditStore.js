@@ -1,4 +1,5 @@
 import { conditionValuesFromTree, normalizeRule } from '/modules/cohort/advancedConditions.js';
+import { csrfHeaders } from './csrf.js';
 
 export const AUDIT_USER_KEY = 'cohort-lens.auditUser.v1';
 
@@ -6,7 +7,7 @@ export async function getCurrentSession() {
   const response = await fetch('/api/audit/session', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { accept: 'application/json' }
+    headers: csrfHeaders({ accept: 'application/json' })
   });
   if (!response.ok) return null;
   const payload = await response.json().catch(() => ({}));
@@ -17,7 +18,7 @@ export async function recordFeasibilityRun(config, result, sql) {
   const response = await fetch('/api/audit/run', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'content-type': 'application/json' },
+    headers: csrfHeaders({ 'content-type': 'application/json' }),
     body: JSON.stringify({
       question: config.question || '',
       indexEligibleCount: result.indexEligibleCount,
@@ -26,7 +27,8 @@ export async function recordFeasibilityRun(config, result, sql) {
       attrition: result.attrition,
       selectedConcepts: collectSelectedConcepts(config),
       config,
-      sql
+      sql,
+      datasetVersion: result.datasetVersion || ''
     })
   });
   const payload = await response.json().catch(() => ({}));
@@ -55,7 +57,8 @@ export async function readAuditLogs() {
 export async function clearAuditLogs() {
   const response = await fetch('/api/logs', {
     method: 'DELETE',
-    credentials: 'same-origin'
+    credentials: 'same-origin',
+    headers: csrfHeaders()
   });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
@@ -79,7 +82,7 @@ export async function saveSavedCohort(cohort) {
   const response = await fetch('/api/cohorts', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'content-type': 'application/json' },
+    headers: csrfHeaders({ 'content-type': 'application/json' }),
     body: JSON.stringify(cohort)
   });
   const payload = await response.json().catch(() => ({}));
@@ -92,7 +95,8 @@ export async function saveSavedCohort(cohort) {
 export async function deleteSavedCohort(cohortId) {
   const response = await fetch(`/api/cohorts/${encodeURIComponent(cohortId)}`, {
     method: 'DELETE',
-    credentials: 'same-origin'
+    credentials: 'same-origin',
+    headers: csrfHeaders()
   });
   if (!response.ok && response.status !== 204) {
     const payload = await response.json().catch(() => ({}));

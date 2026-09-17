@@ -1,5 +1,6 @@
 import { getCurrentUser } from './authClient.js';
 import { setAuditUser } from './auditStore.js';
+import { csrfHeaders } from './csrf.js';
 
 const form = document.getElementById('loginForm');
 const status = document.getElementById('loginStatus');
@@ -27,7 +28,7 @@ form.addEventListener('submit', async (event) => {
   const response = await fetch('/api/auth/login', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'content-type': 'application/json' },
+    headers: csrfHeaders({ 'content-type': 'application/json' }),
     body: JSON.stringify({
       email: document.getElementById('email').value,
       password: document.getElementById('password').value
@@ -150,7 +151,7 @@ async function postJson(url, body) {
   const response = await fetch(url, {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { 'content-type': 'application/json' },
+    headers: csrfHeaders({ 'content-type': 'application/json' }),
     body: JSON.stringify(body)
   });
   return {

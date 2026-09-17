@@ -16,6 +16,7 @@ import {
 } from './auditStore.js';
 import { renderAuthUser, requireAuth } from './authClient.js';
 import { createFilterBuilder } from './filterBuilder.js';
+import { csrfHeaders } from './csrf.js';
 
 const state = {
   dataSource: 'json',
@@ -381,9 +382,7 @@ async function executeFeasibility(config) {
   const response = await fetch('/api/feasibility/run', {
     method: 'POST',
     credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json'
-    },
+    headers: csrfHeaders({ 'content-type': 'application/json' }),
     body: JSON.stringify({ config })
   });
   const payload = await response.json().catch(() => ({}));
@@ -391,7 +390,7 @@ async function executeFeasibility(config) {
     throw new Error(payload.error || 'Unable to run feasibility query.');
   }
   state.dataSource = payload.dataSource || state.dataSource;
-  return payload.result;
+  return { ...payload.result, datasetVersion: payload.metadata?.datasetVersion || '' };
 }
 
 function reportRuntimeError(error) {
@@ -415,7 +414,7 @@ function renderResult(result) {
 async function refreshSqlFromForm() {
   try {
     state.config = readConfigFromForm({ validate: true });
-    renderSql();
+    await renderSql();
   } catch (error) {
     state.currentSql = '';
     els.generatedSql.textContent = error.message;
@@ -452,9 +451,7 @@ async function submitCohortRequest() {
     const response = await fetch('/api/cohort-request', {
       method: 'POST',
       credentials: 'same-origin',
-      headers: {
-        'content-type': 'application/json'
-      },
+      headers: csrfHeaders({ 'content-type': 'application/json' }),
       body: JSON.stringify({
         email,
         name,
@@ -675,10 +672,23 @@ function sendPrompt(prompt) {
   console.info(prompt);
 }
 
-function renderSql() {
-  const generated = state.dataSource === 'omop-duckdb'
-    ? buildOmopPreviewSql(state.config)
-    : buildSql(state.config);
+async function renderSql() {
+  let generated;
+  if (state.dataSource === 'omop-postgres') {
+    const response = await fetch('/api/feasibility/preview', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: csrfHeaders({ 'content-type': 'application/json' }),
+      body: JSON.stringify({ config: state.config })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(payload.error || 'Unable to preview SQL.');
+    generated = { sql: payload.sql, summary: buildOmopPreviewSql(state.config).summary };
+  } else {
+    generated = state.dataSource === 'omop-duckdb'
+      ? buildOmopPreviewSql(state.config)
+      : buildSql(state.config);
+  }
   state.currentSql = generated.sql;
   els.generatedSql.innerHTML = highlightSql(generated.sql);
   els.sqlSummary.textContent = generated.summary;

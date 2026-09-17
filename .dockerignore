@@ -1,0 +1,11 @@
+.git
+.venv
+.env
+.env.*
+config/app.config.json
+temp
+data
+docs
+tests
+*.pyc
+__pycache__

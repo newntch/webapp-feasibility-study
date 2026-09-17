@@ -18,28 +18,31 @@ Deliver results that are:
 4. **Minimal** (small diffs, little churn, no needless dependencies)
 
 ## Project Structure & Module Organization
-This repository folder is currently a minimal scaffold with no application code checked in yet. Keep all project files inside `webapp-feasibility-study/`; do not add or modify files in the parent repository unless explicitly requested.
+Keep all project files inside `webapp-feasibility-study/`; do not add or modify files in the parent repository unless explicitly requested.
 
-When implementation starts, use a predictable layout:
-- `src/` for application code
-- `tests/` for automated tests
-- `public/` or `assets/` for static files
-- `docs/` for design notes or feasibility findings
+Use a predictable layout:
+- `src/apps/` and `src/config/` for Django code
+- `src/core/` for plain browser modules served by Django
+- `tests/django/` for automated tests
+- `public/` for static browser files
+- `docs/` for design notes and operational guidance
 
 Favor small, focused modules and keep related tests near the feature they validate or under `tests/` with matching names.
 
 ## Build, Test, and Development Commands
-This project uses an Express backend with Node.js scripts.
+This project uses Django and two PostgreSQL databases. No Node runtime or JavaScript package manager is required.
 
-- `pnpm dev` starts the local Express server at `http://localhost:4173`.
-- `pnpm test` runs the cohort feasibility engine and HTTP contract tests.
+- `docker compose up -d` starts the local database and web service at `http://localhost:4173`.
+- `uv run pytest -q` runs the Python and Django tests.
+- `uv run ruff check src tests/django` checks Python style.
+- `uv run python manage.py sync_dictionary` refreshes the public dictionary snapshot.
 
 Scope Git commands to this folder because the Git root is the parent directory:
 - `git status -- webapp-feasibility-study`
 - `git diff -- webapp-feasibility-study`
 - `git add webapp-feasibility-study/`
 
-Preserve explicit scripts such as `pnpm dev`, `pnpm test`, and `pnpm lint` when tooling is expanded.
+Keep browser JavaScript as plain modules unless a future change explicitly requires a build step.
 
 ## Coding Style & Naming Conventions
 Use 2 spaces for indentation in Markdown, JSON, YAML, and frontend code unless the selected stack has a stronger convention. Name files by purpose:
@@ -50,9 +53,9 @@ Use 2 spaces for indentation in Markdown, JSON, YAML, and frontend code unless t
 Adopt a formatter and linter with the first real code contribution and commit their config with the code that depends on it.
 
 ## Testing Guidelines
-The current tests use Node's built-in test runner. Require tests for core logic and any calculations, parsers, or scoring rules used in the feasibility study.
+The current tests use pytest and Django's test client. Require tests for core logic and any calculations, parsers, or scoring rules used in the feasibility study.
 
-Prefer names that mirror behavior, such as `tests/cost-model.test.ts` or `src/__tests__/cost-model.test.ts`.
+Prefer names that mirror behavior, such as `tests/django/test_clinical_sql.py`.
 
 ## Commit & Pull Request Guidelines
 The visible history only contains `first commit`, so there is no reliable existing convention to preserve. Use short, imperative commit subjects instead:

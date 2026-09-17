@@ -1,4 +1,5 @@
 import { setAuditUser } from './auditStore.js';
+import { csrfHeaders } from './csrf.js';
 
 export async function requireAuth() {
   const user = await getCurrentUser();
@@ -33,7 +34,8 @@ export function renderAuthUser(user, container) {
 export async function logout() {
   await fetch('/api/auth/logout', {
     method: 'POST',
-    credentials: 'same-origin'
+    credentials: 'same-origin',
+    headers: csrfHeaders()
   });
   sessionStorage.removeItem('cohort-lens.auditUser.v1');
   location.replace('/login.html');

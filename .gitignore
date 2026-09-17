@@ -1,5 +1,4 @@
 .DS_Store
-node_modules/
 dist/
 coverage/
 .env
@@ -9,4 +8,11 @@ config/*.json
 data
 public/data/synthetic-clinical-data.json
 .agents
+.codex
 temp/
+.venv/
+staticfiles/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
