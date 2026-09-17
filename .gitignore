@@ -9,3 +9,4 @@ config/*.json
 data
 public/data/synthetic-clinical-data.json
 .agents
+temp/
