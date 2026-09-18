@@ -86,3 +86,6 @@ GOOGLE_ALLOWED_EMAILS = {
     if email.strip()
 }
 CLINICAL_DATASET_VERSION = os.environ.get("CLINICAL_DATASET_VERSION", "ehrshot-omop-v5.3.1")
+DEMO_ACCOUNT_EMAIL = os.environ.get("DEMO_ACCOUNT_EMAIL", "researcher@example.com").strip().lower()
+DEMO_ACCOUNT_PASSWORD = os.environ.get("DEMO_ACCOUNT_PASSWORD", "ChangeMe123!")
+DEMO_ACCOUNT_ENABLED = os.environ.get("DEMO_ACCOUNT_ENABLED", "0") == "1"

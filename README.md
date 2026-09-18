@@ -16,7 +16,7 @@ Follow [the PostgreSQL-only cutover guide](docs/postgres-only-cutover.md) to
 configure secrets and restore or initialize the two databases. Then:
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
 Open <http://127.0.0.1:4173>. The browser assets are served by Django.
@@ -32,7 +32,9 @@ uv run ruff format --check src tests/django
 
 To run Django outside the web container against a reachable PostgreSQL server,
 set the database environment variables in [setup and configuration](docs/setup-and-configuration.md)
-and run `uv run python manage.py runserver 4173`.
+run `uv run python manage.py migrate`, provision the local demo account with
+`DEMO_ACCOUNT_ENABLED=1 uv run python manage.py ensure_demo_user`, and then
+run `uv run python manage.py runserver 4173`.
 
 ## Documentation
 

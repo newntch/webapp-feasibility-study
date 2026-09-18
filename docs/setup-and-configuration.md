@@ -19,6 +19,7 @@ The Django environment variables are:
 | Email | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SMTP_SECURE` |
 | Google sign-in | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `GOOGLE_ALLOWED_EMAILS` |
 | Clinical provenance | `CLINICAL_DATASET_VERSION` |
+| Local demo account | `DEMO_ACCOUNT_ENABLED`, `DEMO_ACCOUNT_EMAIL`, `DEMO_ACCOUNT_PASSWORD` |
 
 See [the PostgreSQL-only cutover guide](postgres-only-cutover.md) for the
 first-run and restore sequence. The web service has no filesystem clinical or
@@ -31,3 +32,10 @@ configured. No password-hash generation script is needed.
 
 The four public pages and their browser JavaScript modules are served by
 Django. No build step is required for these assets.
+
+The Docker Compose web service applies Django migrations before starting and,
+when `DEMO_ACCOUNT_ENABLED=1`, creates the demo account if it does not already
+exist. Compose enables this local-only account by default with
+`researcher@example.com` / `ChangeMe123!`. Set `DEMO_ACCOUNT_ENABLED=0` and
+provide a strong `DJANGO_SECRET_KEY` and application credentials for any
+non-demo deployment.

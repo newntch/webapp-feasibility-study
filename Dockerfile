@@ -18,6 +18,8 @@ COPY --from=build /app/manage.py ./
 COPY --from=build /app/src ./src
 COPY --from=build /app/public ./public
 COPY --from=build /app/staticfiles ./staticfiles
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
 USER app
 EXPOSE 4173
+ENTRYPOINT ["/bin/sh", "/app/docker-entrypoint.sh"]
 CMD ["/app/.venv/bin/gunicorn", "config.wsgi:application", "--pythonpath", "src", "--bind", "0.0.0.0:4173", "--workers", "2"]
